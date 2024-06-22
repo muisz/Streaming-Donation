@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'drf_standardized_errors',
 
     'apps.user',
+    'apps.streaming',
 ]
 
 MIDDLEWARE = [

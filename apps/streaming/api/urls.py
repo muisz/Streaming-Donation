@@ -1,10 +1,11 @@
 from rest_framework.routers import DefaultRouter
-from apps.user.api import views
+
+from apps.streaming.api import views
+
 
 urlpatterns = []
 
 router = DefaultRouter()
-router.register('', views.auth_view, basename='auth')
+router.register('streams', views.streaming_view, basename='streams')
 
 urlpatterns += router.urls
-
