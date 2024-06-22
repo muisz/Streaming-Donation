@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_standardized_errors',
 
     'apps.user',
 ]
@@ -149,7 +150,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'EXCEPTION_HANDLER': 'drf_standardized_errors.handler.exception_handler',
 }
 
 SIMPLE_JWT = {
