@@ -153,6 +153,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'EXCEPTION_HANDLER': 'drf_standardized_errors.handler.exception_handler',
+    'DEFAULT_PAGINATION_CLASS': 'apps.utils.paginations.Pagination',
 }
 
 SIMPLE_JWT = {

@@ -7,5 +7,6 @@ urlpatterns = []
 
 router = DefaultRouter()
 router.register('streams', views.streaming_view, basename='streams')
+router.register('comments', views.comment_view, basename='comment')
 
 urlpatterns += router.urls

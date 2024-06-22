@@ -68,3 +68,17 @@ class Streaming(BaseModel):
     def stop(self):
         self.status = self.ENDED
         self.save()
+
+
+class Comment(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='comments')
+    streaming = models.ForeignKey(Streaming, on_delete=models.PROTECT, related_name='streamings')
+    comment = models.TextField()
+
+    @classmethod
+    def create(cls, comment, user, streaming):
+        return cls.objects.create(
+            comment=comment,
+            user=user,
+            streaming=streaming
+        )
