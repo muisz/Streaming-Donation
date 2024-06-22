@@ -1,0 +1,7 @@
+env/
+venv/
+Env/
+**/__pycache__/
+apps/media/
+
+.env
