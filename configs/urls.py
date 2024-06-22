@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('apps.user.api.urls')),
     path('api/', include('apps.streaming.api.urls')),
+    path('api/', include('apps.donation.api.urls')),
 ]

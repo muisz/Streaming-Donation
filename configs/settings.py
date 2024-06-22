@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 
     'apps.user',
     'apps.streaming',
+    'apps.donation',
 ]
 
 MIDDLEWARE = [
