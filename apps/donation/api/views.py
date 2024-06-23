@@ -10,6 +10,7 @@ from apps.donation.api.serializers import (
     CreateDonationSerializer,
     DonationSerializer,
 )
+from apps.libs.midtrans import Midtrans
 
 
 class DonationView(GenericViewSet):
@@ -17,7 +18,7 @@ class DonationView(GenericViewSet):
 
     def get_queryset(self):
         streaming_code = self.request.query_params.get('stream')
-        return Donation.objects.filter(streaming=streaming_code).order_by('date_created')
+        return Donation.objects.filter(streaming=streaming_code, status__in=(Donation.NEED_CONFIRMATION_STATUS, Donation.SUCCESS_STATUS)).order_by('date_created')
     
     def get_object(self):
         donation = Donation.objects.filter(id=self.kwargs['pk']).first()
@@ -58,4 +59,28 @@ class DonationView(GenericViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class MidtransCallbackView(GenericViewSet):
+    permission_classes = ()
+    authentication_classes = ()
+
+    def create(self, request):
+        midtrans = Midtrans()
+        if not midtrans.validate_transaction_signature(request.data):
+            return Response({"error": "Invalid signature"}, status=status.HTTP_400_BAD_REQUEST)
+
+        transaction_id = request.data.get("transaction_id")
+        payment = midtrans.get_transaction_detail(transaction_id)
+        donation = Donation.objects.filter(payment_id=transaction_id).first()
+        if donation is None:
+            return Response()
+        
+        if payment.is_success:
+            donation.mark_as_success()
+        elif payment.is_failed:
+            donation.mark_as_failed()
+
+        return Response()
+
+
 donation_view = DonationView
+midtrans_callback_view = MidtransCallbackView

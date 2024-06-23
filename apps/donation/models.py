@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from apps.streaming.models import Streaming
 from apps.utils.models import BaseModel
+from apps.libs.midtrans import Midtrans, RequestPayment
 
 User = get_user_model()
 
@@ -46,6 +47,7 @@ class Donation(BaseModel):
     # instant payment
     payment_id = models.CharField(max_length=100, null=True, blank=True)
     va_number = models.CharField(max_length=100, null=True, blank=True)
+    bank_code = models.CharField(max_length=100, null=True, blank=True)
 
     # manual payment
     bank_name = models.CharField(max_length=100, null=True, blank=True)
@@ -63,6 +65,30 @@ class Donation(BaseModel):
             payment_file=payment.payment_file,
         )
         donation.save()
+        return donation
+    
+    @classmethod
+    def create_instant_payment(cls, streaming, user, amount, bank_code):
+        donation = cls(
+            user=user,
+            streaming=streaming,
+            amount=amount,
+            payment_type=Donation.INSTANT_PAYMENT,
+            status=Donation.PENDING_STATUS,
+        )
+        donation.save()
+
+        midtrans_payment = RequestPayment(
+            order_id=donation.id,
+            gross_amount=amount,
+            bank_code=bank_code,
+        )
+        midtrans_response = Midtrans().create_payment(midtrans_payment)
+        donation.va_number = midtrans_response.va_number
+        donation.payment_id = midtrans_response.transaction_id
+        donation.bank_code = bank_code
+        donation.save()
+
         return donation
     
     def confirm(self, by_user):
@@ -83,5 +109,14 @@ class Donation(BaseModel):
         if self.status != self.NEED_CONFIRMATION_STATUS:
             raise Exception('Confirmation not needed')
         
+        self.status = self.FAILED_STATUS
+        self.save()
+
+    def mark_as_success(self):
+        self.status = self.SUCCESS_STATUS
+        self.success_at = timezone.now()
+        self.save()
+    
+    def mark_as_failed(self):
         self.status = self.FAILED_STATUS
         self.save()
